@@ -14,7 +14,7 @@ def _formatFloatValue(value):
     exponentString = "%+.0f" % int(expSign * expValue)
     
     valueString = ("%0.2e" % value)[:4]
-    return valueString + "E" + exponentString
+    return str(valueString + "E" + exponentString)
 
 class KJLC925PiraniSensor(object):
 
@@ -35,11 +35,13 @@ class KJLC925PiraniSensor(object):
     
 
     def _query(self,command,replyConverter=str):
-        commandString = "@%i%s;FF" % (self.deviceAddres,command)
+        commandString = "@%i%s;FF".encode() % (self.deviceAddres,command)
+        print commandString
         self.serial.write(commandString)
         self.serial.flush()
         
         reply = self.serial.readall()
+        
         try:
             if replyConverter is not None:
                 value = replyConverter(re.findall(r"@253ACK(.*);FF",reply)[0])
@@ -103,20 +105,20 @@ class KJLC925PiraniSensor(object):
         return value
        
     @public
-    def getTransducerTemperature(self,float):
+    def getTransducerTemperature(self):
         """
         Returns the 925C on-chip sensor temperature in degrees Celcius.
         """
         
-        value = self._query("TEM?")
+        value = self._query("TEM?",float)
         return value
        
     @public
-    def getPressure(self,float):
+    def getPressure(self):
         """
         Returns the measured pressure from the 925.
         """
-        pressure = self._query("PR1?")
+        pressure = self._query("PR1?",float)
         return pressure
        
     @public
@@ -127,9 +129,9 @@ class KJLC925PiraniSensor(object):
         gasType = self._query("GT?").lower()
         return gasType
     
-   
+       
     @public
-    def setGasType(self,gasType="air"):
+    def setGasType(self,gasType=u"argon"):
         """
         Sets gas type for measurement. 
         The 925C measures thermal conductivity; using the gas calibration compensates for gas errors.
@@ -140,7 +142,8 @@ class KJLC925PiraniSensor(object):
         gasType: "air"|"argon"|"nitrogen"|"H2O"|"hydrogen"|"helium"
         """
         
-        self._query("GT!%s" % gasType.upper())
+        gasType = str(gasType) # this is nescessary for the serial port to understand the encoding
+        self._query("GT!%s" % gasType.upper(),None)
         
     
        
@@ -174,6 +177,7 @@ class KJLC925PiraniSensor(object):
         command. The set point must be enabled for the set point command to
         function
         """
+        
         self._query("SP1!%s" % _formatFloatValue(pressure))
    
     @public
@@ -184,6 +188,7 @@ class KJLC925PiraniSensor(object):
         pressure = self._query("SP1?",float)
         return pressure
 
+    @public
     def setHysteresisValue(self,pressure):
         """
         Sets the pressure value at which the set point relay will be de-energized (i.e., N.C. and O contacts will be

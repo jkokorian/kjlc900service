@@ -5,7 +5,7 @@ import zmq
 
 from tinyrpc.transports.zmq import ZmqServerTransport
 from tinyrpc.protocols.jsonrpc import JSONRPCProtocol
-from tinyrpc.dispatch import RPCDispatcher
+from tinyrpc.dispatch import RPCDispatcher,public
 
 from tinyrpc.server import RPCServer
 
@@ -22,10 +22,10 @@ if __name__=="__main__":
     system("Title "+"Device Service: KJLC 925 Pirani sensor")    
 
     parser = argparse.ArgumentParser(description="Device service for a KJLC 925 pirani sensor")
-    parser.add_argument("--device-port","-d",dest="serialPortName",type=str,default="COM1")
+    parser.add_argument("--device-port","-d",dest="serialPortName",type=str,default="COM6")
     parser.add_argument("--device-address","-i",dest="deviceAddress",type=int,default=253)
     parser.add_argument("--baud-rate","-b",dest="baudrate",type=int,default=9600)
-    parser.add_argument("--service-port","-p",dest="servicePort",type=int,default=None)
+    parser.add_argument("--service-port","-p",dest="servicePort",type=int,default=5005)
     parser.add_argument("--service-ip",dest="serviceIP",type=str,default="127.0.0.1")
     
     args = parser.parse_args()
@@ -40,6 +40,7 @@ if __name__=="__main__":
                            
     dispatcher = RPCDispatcher()
     dispatcher.register_instance(pirani)
+    
 
     ctx = zmq.Context()
     
@@ -53,3 +54,5 @@ if __name__=="__main__":
         JSONRPCProtocol(),
         dispatcher
     )
+    
+    rpc_server.serve_forever()
