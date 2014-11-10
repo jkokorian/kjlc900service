@@ -26,14 +26,14 @@ if __name__=="__main__":
     parser.add_argument("--device-address","-i",dest="deviceAddress",type=int,default=253)
     parser.add_argument("--baud-rate","-b",dest="baudrate",type=int,default=9600)
     parser.add_argument("--service-port","-p",dest="servicePort",type=int,default=None)
-    parser.add_argument("--service-ip)",dest="serviceIP",type=str,default="127.0.0.1")
+    parser.add_argument("--service-ip",dest="serviceIP",type=str,default="127.0.0.1")
     
     args = parser.parse_args()
     
     serial = serial.Serial(port=portNameToInt(args.serialPortName),
                            baudrate=args.baudrate,
                            parity=serial.PARITY_NONE,
-                           timeout=0.1)    
+                           timeout=0.1)
     
     pirani = KJLC925PiraniSensor(serial,deviceAddress=args.deviceAddress)
     
